@@ -1,8 +1,7 @@
 <?php
 
+use App\Http\Requests\TaskRequest;
 use App\Models\Task;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -17,27 +16,39 @@ Route::get('/tasks', function (){
 
 Route::view('/tasks/create', 'create')->name('task.create');
 
-Route::get('/tasks/{id}', function ($id) {
+Route::get('/tasks/{task}/edit', function (Task $task) {
+    return view('edit', [
+        'task' =>  $task,
+    ]);
+})->name('task.edit');
+
+Route::get('/tasks/{task}', function (Task $task) {
     return view('show', [
-        'task' => Task::findOrFail($id),
+        'task' =>  $task,
     ]);
 })->name('task.show');
 
-Route::post('/tasks', function (Request $request) {
-   $request->validate([
-         'title' => 'required|max:255',
-         'description' => 'required',
-         'long_description' => 'required',
-   ]);
+Route::post('/tasks', function (TaskRequest $request) {
 
-   $task = new Task();
-   $task->title = $request->title;
-   $task->description = $request->description;
-   $task->long_description = $request->long_description;
-   $task->save();
+   $task = Task::create($request->validated());
    
-   return redirect()->route('task.show', ['id' => $task->id])
+   return redirect()->route('task.show', ['task' => $task->id])
    ->with('success', 'Tarefa criada com sucesso!');
 })->name('task.store');
+
+Route::put('/tasks/{task}', function (Task $task, TaskRequest $request) {
+
+    $task->update($request->validated());
+
+    return redirect()->route('task.show', ['task' => $task->id])
+    ->with('success', 'Tarefa atualizada com sucesso!');
+ })->name('task.update');
+
+Route::delete('/tasks/{task}', function (Task $task) {
+    $task->delete();
+
+    return redirect()->route('task.index')
+    ->with('success', 'Tarefa deletada com sucesso!');
+})->name('task.delete');
 
 

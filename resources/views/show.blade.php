@@ -16,5 +16,11 @@
     <p>Tarefa Completa?: {{$task->completed ? 'Sim' : 'Não'}}</p>
 
     <a href="{{ route('task.index') }}">Back to tasks</a>
-
+    <div>
+        <form action="{{ route('task.delete', ['task' => $task->id]) }}" method="post">
+            @csrf
+            @method('delete')
+            <button type="submit">Delete</button>
+        </form> 
+    </div>
 @endsection
